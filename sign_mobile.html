@@ -1,0 +1,112 @@
+<html><head><style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    .canvas-box{
+        border: 1px solid #000;
+    }
+    
+    .img-box{
+    
+        background: #ddd;
+        width: 300px;
+        height: 300px;
+    }
+    </style>
+        </head><body>
+            <div class="container">
+                <canvas class="canvas-box" id="canvas" height="500" width="500"></canvas>
+                <div>
+                    <button id="clear">清空画布</button>
+                    <button id="save">保存</button>
+                </div>
+                <div class="img-box" id="img"></div>
+            </div>
+        
+    <script>
+        var myCanvas = document.getElementById("canvas");
+        var ctx = myCanvas.getContext("2d");
+        var clearBtn = document.getElementById("clear");
+        var saveBtn = document.getElementById("save");
+        var imgBox = document.getElementById("img");
+    
+        var isMouseMove = false; //是否在画
+        var lastX, lastY; //线条结束位置
+    
+        window.onload = function(){
+            initCanvas();
+        }
+    
+        function initCanvas() {
+            let offset = myCanvas.getBoundingClientRect();
+            let down = (event) => {
+                event.preventDefault();
+                isMouseMove = true;
+                drawLine(
+                    event.changedTouches[0].clientX - offset.left,
+                    event.changedTouches[0].clientY - offset.top,
+                    false
+                );
+            };
+            let move = (event) => {
+                if(isMouseMove){
+                    drawLine(
+                        event.changedTouches[0].clientX - offset.left,
+                        event.changedTouches[0].clientY - offset.top,
+                        true
+                    );
+                }
+            };
+            let up = (event) => {
+                isMouseMove = false;
+            };
+            let leave = (event) => {
+                isMouseMove = false;
+            }
+    
+            myCanvas.addEventListener("touchstart", down);
+            myCanvas.addEventListener("touchmove", move);
+            myCanvas.addEventListener("touchend", up);
+            myCanvas.addEventListener("touchcancel", leave);
+        }
+    
+        function drawLine(x, y, isDraw){
+            if(isDraw){
+                ctx.beginPath();
+                ctx.lineWidth = 2; //设置线的宽度
+                ctx.strokeStyle = "black";
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+                ctx.closePath();
+            }
+    
+            //每次移动都更新线条结尾坐标位置
+            lastX = x;
+            lastY = y;
+        }
+    
+        function clearCanvas(){
+            imgBox.innerHTML = "";
+            ctx.beginPath();
+            ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
+            ctx.closePath();
+        }
+    
+        function saveCanvas(){
+            let images = myCanvas.toDataURL('image/jpg');
+    
+            imgBox.innerHTML = `<img src ='${images}'>`
+        }
+    
+        clear.addEventListener("click", clearCanvas);
+        saveBtn.addEventListener("click", saveCanvas);
+    </script>
+    
+    
+    
+    
+    </body></html>
